@@ -146,7 +146,8 @@ Each W is big-endian on the wire; composite values can use LOW-WORD-FIRST order.
     Names are firmware-derived descriptions, not official alarm severity levels.
     Higher bits and W28/W29 remain raw. A cleared word is NOT a health guarantee.
   W30..W32    firmware/bank metadata preserved raw; no active-bank guess
-  bytes66..89 controller/BMS serial field; NOT individual module serial numbers
+  bytes66..89 24-byte controller/BMS field (all bytes preserved raw); display uses
+              the first19 characters for compatibility. NOT module serial numbers
   W47         legacy 'Fault_raw' value retained in CSV; UI calls it R47
               The inspected small BMS builder writes zero here. R47=0 is NOT
               proof of no battery faults; consult official BMS/Fronius events.
@@ -340,7 +341,9 @@ function Convert-Tower([int[]]$Words,[int]$Tower,[DateTime]$RequestedAt,[DateTim
         for ($i=0; $i -lt $end; $i++) {
             if ($serialBytes[$i] -lt 32 -or $serialBytes[$i] -gt 126) { $printable=$false }
         }
-        if ($printable) { $serial=[Text.Encoding]::ASCII.GetString($serialBytes,0,$end).Trim() }
+        if ($printable) { $serial=[Text.Encoding]::ASCII.GetString($serialBytes,0,[Math]::Min(19,$end)).Trim() }
+        # Preserve all 24 raw bytes in SerialHex/Words. The inspected BMU pads
+        # the 19-character identifier with x characters; keep legacy SN matching.
     }
     if ($Words[24] -gt 1000) { throw "Tower ${Tower}: implausible SOC field; raw payload preserved." }
     if ($Words[25] -gt 100) { throw "Tower ${Tower}: invalid SOH representation; refusing to guess its scale." }
@@ -696,15 +699,17 @@ function Read-Exact([int]$Count,[Diagnostics.Stopwatch]$Deadline) {
     $offset=0
     while($offset -lt $Count) {
         $async=$script:Stream.BeginRead($buffer,$offset,$Count-$offset,$null,$null)
-        try {
-            while(-not $async.AsyncWaitHandle.WaitOne(50)) {
-                Invoke-Tick
-                if($Deadline.ElapsedMilliseconds -gt $Settings.FrameTimeoutMs) { throw [IO.IOException]::new('TCP frame timeout; partial capture discarded.') }
+        # Do not create/close AsyncWaitHandle: modern .NET can reuse APM objects.
+        while(-not $async.IsCompleted) {
+            Invoke-Tick
+            if($Deadline.ElapsedMilliseconds -gt $Settings.FrameTimeoutMs) {
+                throw [IO.IOException]::new('TCP frame timeout; partial capture discarded.')
             }
-            $n=$script:Stream.EndRead($async)
-            if($n -le 0){throw [IO.IOException]::new('BYD closed the TCP connection.')}
-            $offset+=$n
-        } finally { $async.AsyncWaitHandle.Close() }
+            Start-Sleep -Milliseconds 10
+        }
+        $n=$script:Stream.EndRead($async)
+        if($n -le 0){throw [IO.IOException]::new('BYD closed the TCP connection.')}
+        $offset+=$n
     }
     return ,$buffer
 }
@@ -771,13 +776,12 @@ function Open-Connection {
     $script:Tcp.NoDelay=$true
     $async=$script:Tcp.BeginConnect($Ip,$Port,$null,$null)
     $timer=[Diagnostics.Stopwatch]::StartNew()
-    try {
-        while(-not $async.AsyncWaitHandle.WaitOne(50)) {
-            Invoke-Tick
-            if($timer.ElapsedMilliseconds -gt $Settings.ConnectTimeoutMs){throw [IO.IOException]::new('BYD TCP connect timeout.')}
-        }
-        $script:Tcp.EndConnect($async)
-    } finally {$async.AsyncWaitHandle.Close()}
+    while(-not $async.IsCompleted) {
+        Invoke-Tick
+        if($timer.ElapsedMilliseconds -gt $Settings.ConnectTimeoutMs){throw [IO.IOException]::new('BYD TCP connect timeout.')}
+        Start-Sleep -Milliseconds 10
+    }
+    $script:Tcp.EndConnect($async)
     $script:Stream=$script:Tcp.GetStream()
     $script:Stream.ReadTimeout=$Settings.FrameTimeoutMs
     $script:Stream.WriteTimeout=$Settings.FrameTimeoutMs
@@ -898,7 +902,7 @@ function Save-Status {
 function Publish-Tower($TowerData) {
     $previous=$State.Towers[$TowerData.Tower]
     if($null -ne $previous) {
-        if($previous.Serial -ne $TowerData.Serial){throw 'BMS serial changed during this session. Capture stopped.'}
+        if($previous.SerialHex -ne $TowerData.SerialHex){throw 'BMS serial field changed during this session. Capture stopped.'}
     }
     foreach($other in @($State.Towers.Values)) {
         if($other.Tower -ne $TowerData.Tower -and $TowerData.Serial -ne '' -and $other.Serial -eq $TowerData.Serial){throw 'Duplicate BMS serial across tower responses. Capture stopped.'}
