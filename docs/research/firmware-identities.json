@@ -1,0 +1,10 @@
+{
+  "BMU-P3-3.27-B-A8FB.bin": {"bytes": 180840, "sha256": "ed0d4ce6a427aa9bcfd6dfd45543f6250011985eac8298e6f49257cef3db1b06"},
+  "BMU-P3-3.27-B-8EAF.bin": {"bytes": 101636, "sha256": "1937113a537809ec96d5b473c221234a7039e81610945999c037d8bd61b21979"},
+  "BMU-P3-3.27-A-8956.bin": {"bytes": 101632, "sha256": "eff6dcf6242310b0a71ee8e1dc9e7c1411a6b0d66e1200a891b773eb73999c3f"},
+  "BMS-P3-3.32-B-B5FA.bin": {"bytes": 85852, "sha256": "63b2e40f3a0e841cd4f3536834856356db19cbe75da5e88a7012731efe97e7d0"},
+  "BMS-P3-3.32-A-84A1.bin": {"bytes": 163736, "sha256": "454383fcd80fa05b7981bc22859d1f9e3b3606af39b7ab4b5494fa4e96d478f2"},
+  "BMU-P3-3.27-A-5451.bin": {"bytes": 180840, "sha256": "d6f69bd43fa6dc1cfd20b17e66b16bdec4728407554c382e868a4792e9635cfb"},
+  "BMS-P3-3.32-B-64EE.bin": {"bytes": 163744, "sha256": "0d2e4a336b789ef3f052fefde856a264d57a40a528d8a7f0b3d8aa0edc061c93"},
+  "BMS-P3-3.32-A-21C9.bin": {"bytes": 85836, "sha256": "884a2aadc7e5509fcdde5eb2b8b26e6b89e58d51001cc2b3c23f795ec8220a83"}
+}
