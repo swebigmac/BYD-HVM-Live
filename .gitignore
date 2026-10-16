@@ -1,5 +1,6 @@
-# Personal diagnostics and generated data
+# Personal diagnostics and generated data (not a redaction mechanism)
 LIVE-*/
+DEMO-*/
 BYD-Diagnostik/
 *.csv
 *.ndjson
@@ -7,15 +8,25 @@ BYD-Diagnostik/
 *.tmp
 *.bak
 *.zip
+snapshot-*.json
+*private*.json
 
-# Local settings and private environment
+# Original firmware, application and network captures
+*.bin
+*.apk
+*.pcap
+*.pcapng
+
+# Local settings and secrets
 .env
 .env.*
 local-config.ps1
 *.secrets.ps1
 
-# Editor and OS metadata
+# Editor/runtime metadata
 .vscode/
 .idea/
+__pycache__/
+*.pyc
 .DS_Store
 Thumbs.db
