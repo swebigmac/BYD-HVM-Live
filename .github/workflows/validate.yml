@@ -2,7 +2,9 @@ name: Offline validation
 on:
   push:
     branches: [main, 'feature/**']
+    paths: ['**.ps1', 'tests/**', '.github/workflows/validate.yml']
   pull_request:
+    paths: ['**.ps1', 'tests/**', '.github/workflows/validate.yml']
   workflow_dispatch:
 permissions:
   contents: read
