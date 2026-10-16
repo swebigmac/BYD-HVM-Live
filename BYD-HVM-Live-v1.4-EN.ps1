@@ -998,3 +998,83 @@ try {
         [int[]]$config=New-Object int[] 102;$config[16]=($ExpectedTowers -shl 4) -bor $ModulesPerTower;$config[17]=0x0102
         $State.Config=$config
     } else {
+        Open-Connection
+        [int[]]$config=Read-Registers 0 102
+        $State.Config=$config
+        $State.DeviceConfig=Convert-Configuration $config
+        $State.ConfigSummary=$State.DeviceConfig.Summary
+        Write-Raw ([ordered]@{Type='Config';ReceivedAt=[DateTime]::UtcNow.ToString('o');Words=$config;Decoded=$State.DeviceConfig;Frames=$State.Trace.ToArray()})
+        if(-not $State.UiReady){Write-Host $State.ConfigSummary}
+        # Preserve both safety checks: configured layout AND HVM model code.
+        Assert-HvmConfiguration $State.DeviceConfig
+        if($CheckOnly){
+            Write-Host 'CONFIG OK: HVM layout verified. No tower requests or diagnostic writes sent.'
+            return
+        }
+    }
+    while($true) {
+        $State.Scan++
+        $sweep=[Diagnostics.Stopwatch]::StartNew()
+        if($Demo) {
+            [int[]]$status=New-Object int[] 25
+            $status[0]=[Math]::Min(100,14+$State.Scan);$status[3]=98
+            $status[1]=315;$status[2]=281;$status[4]=65522;$status[5]=34300;$status[6]=26;$status[7]=20
+            $State.Status=Convert-Status $status ([DateTime]::UtcNow);Save-Status
+        } else {
+            if(Wait-For-Reconnect){
+                try {Capture-Status} catch {Register-CommunicationFailure 'Systemstatus' $_.Exception.Message}
+            }
+        }
+        for($t=1;$t -le $ExpectedTowers;$t++) {
+            if(-not $Demo) {
+                if(-not (Wait-For-Reconnect)){continue}
+                if($State.FailedTowers.ContainsKey($t)) {
+                    if([DateTime]::UtcNow -lt $State.FailedTowers[$t]){continue}
+                    [void]$State.FailedTowers.Remove($t)
+                }
+            }
+            if($Demo) {
+                $State.Stage="DEMO generating T$t"
+                $at=[DateTime]::UtcNow
+                [int[]]$words=New-DemoWords $t ($State.Scan-1)
+                $towerData=Convert-Tower $words $t $at ([DateTime]::UtcNow)
+                Write-Raw ([ordered]@{Type='DemoTower';ReceivedAt=$at.ToString('o');Tower=$t;Scan=$State.Scan;Words=$words})
+            } else {
+                try {$towerData=Capture-Tower $t}
+                catch {Register-CommunicationFailure ('T'+$t) $_.Exception.Message $t; continue}
+            }
+            Publish-Tower $towerData
+            Wait-Ui $Settings.BetweenTowersMs
+        }
+        $State.LastSweepSeconds=$sweep.Elapsed.TotalSeconds
+        Save-FullSnapshot
+        if($MaxScans -gt 0 -and $State.Scan -ge $MaxScans){break}
+        while($sweep.Elapsed.TotalSeconds -lt $ScanSeconds) {
+            $State.Stage=('Waiting {0}s for next sweep' -f [Math]::Ceiling($ScanSeconds-$sweep.Elapsed.TotalSeconds))
+            Wait-Ui 100
+        }
+    }
+} catch [OperationCanceledException] {
+    $State.Stage='Stopped by user'
+} catch {
+    $script:ExitCode=1
+    $State.LastError=$_.Exception.Message
+    $State.Stage='STOPPED - unexpected program error'
+    if($null -ne $State.ErrorWriter){$State.ErrorWriter.WriteLine(([DateTime]::UtcNow.ToString('o')+' '+$_.ToString()))}
+    try{Write-Raw ([ordered]@{Type='Error';At=[DateTime]::UtcNow.ToString('o');Message=$_.Exception.Message;Frames=$State.Trace.ToArray()})}catch{}
+} finally {
+    if($null -ne $script:Stream){try{$script:Stream.Dispose()}catch{}}
+    if($null -ne $script:Tcp){try{$script:Tcp.Dispose()}catch{}}
+    foreach($name in @('CsvWriter','StatusWriter','RawWriter','ErrorWriter')) {
+        if($null -ne $State[$name]){try{$State[$name].Dispose()}catch{}}
+    }
+    Stop-Display
+    if($script:OwnsMutex -and $null -ne $script:Mutex){try{$script:Mutex.ReleaseMutex()}catch{}}
+    if($null -ne $script:Mutex){$script:Mutex.Dispose()}
+}
+if(-not $SelfTest) {
+    Write-Host ('Monitor closed. {0} tower captures; {1} complete sweeps.' -f $State.Samples,$script:FullSnapshotCount)
+    if($State.LogPath -ne ''){Write-Host ('Saved in: '+$State.LogPath)}
+}
+if($State.LastError -ne ''){Write-Host ('ERROR: '+$State.LastError) -ForegroundColor Red;Write-Host 'The monitor stopped due to a non-recoverable error. No charging controls were issued.'}
+if($script:ExitCode -ne 0){exit $script:ExitCode}
