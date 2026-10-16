@@ -1,0 +1,21 @@
+# Personal diagnostics and generated data
+LIVE-*/
+BYD-Diagnostik/
+*.csv
+*.ndjson
+*.log
+*.tmp
+*.bak
+*.zip
+
+# Local settings and private environment
+.env
+.env.*
+local-config.ps1
+*.secrets.ps1
+
+# Editor and OS metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
