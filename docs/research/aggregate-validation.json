@@ -1,0 +1,17 @@
+{
+  "log_files": 17,
+  "towers": {
+    "1": {"samples": 4647, "balance_nonzero": 665, "balance_at_zero_current": 36, "max_selected": 8},
+    "2": {"samples": 4639, "balance_nonzero": 36, "balance_at_zero_current": 30, "max_selected": 41},
+    "3": {"samples": 4636, "balance_nonzero": 530, "balance_at_zero_current": 91, "max_selected": 45}
+  },
+  "energy_comparison": [
+    {"tower": 1, "period": "after", "covered_seconds": 9817.548533916473, "counter_kWh": 3.625000000001819, "sampled_kWh": 3.581077674101013, "segments": 9, "relative_difference_pct": -1.2116503696767977},
+    {"tower": 1, "period": "before", "covered_seconds": 36720.57033824921, "counter_kWh": 7.65599999999904, "sampled_kWh": 7.501935203017283, "segments": 10, "relative_difference_pct": -2.012340608434904},
+    {"tower": 2, "period": "after", "covered_seconds": 9766.617735862732, "counter_kWh": 4.515999999999849, "sampled_kWh": 4.4792788198493785, "segments": 9, "relative_difference_pct": -0.813135078619831},
+    {"tower": 2, "period": "before", "covered_seconds": 36692.248077631, "counter_kWh": 7.21799999999962, "sampled_kWh": 9.010275921439005, "segments": 10, "relative_difference_pct": 24.830644519804366},
+    {"tower": 3, "period": "after", "covered_seconds": 9756.353219747543, "counter_kWh": 3.451000000000022, "sampled_kWh": 3.4296113059569415, "segments": 9, "relative_difference_pct": -0.6197824990750611},
+    {"tower": 3, "period": "before", "covered_seconds": 36669.48294186592, "counter_kWh": 8.600000000000136, "sampled_kWh": 8.47060471783201, "segments": 10, "relative_difference_pct": -1.5045963042805144}
+  ],
+  "interpretation": "Sequential PC receive times, gaps >20 s excluded, segments <=60 s excluded. Not proof of physical accuracy or firmware causation."
+}
