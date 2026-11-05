@@ -47,10 +47,31 @@ and the explicit split time in PHASE1.md. Raw logs and firmware are not shipped.
 Firmware identity/instruction-byte checks support transcription integrity;
 they do not mechanically prove all manually inferred semantics.
 
+## Physical installation observations, October 2026
+
+The v1.5 dashboard was observed operating on a real installation with three
+seven-module HVM towers during multiple day-long Windows PowerShell sessions.
+Screenshots show continuously updated tower SOC/current, per-cell voltage
+heatmaps and numeric tables, balance selection masks, warning words and energy
+counters across low SOC (~4% system reported) and full charge (100%). Some
+sessions were interrupted by Windows restarts; this is not an uninterrupted
+endurance certification. Captures and identifying controller serials are held
+privately and are not part of this repository.
+
+At full charge, reported balance flags changed over time (including an observed
+56/112 in one tower), sometimes while external tower current was 0 A. Such flags
+are **not** direct measurements of shunt current. Reported upper-cell voltage
+conditions persisted in some periods after individual cell voltages relaxed.
+At a different full-charge event, one cell reportedly reached ~3608 mV; this
+must not be represented as evidence of benign calibration or an approved test.
+No claim is made that the application can infer whether the inverter requested
+zero charge or the BMS enforced a limit.
+
 ## Still required before a stable release
 
-Physical HVM operation of v1.5, prolonged observation of recovery against an
-actual gateway, the real terminal layout/key experience, and independent review
-of new interpretation labels. The code remains an experimental review build.
-Extended statistics, service/reset transactions and module serial retrieval are
-not live-validated or implemented. Main remains on the prior version until review.
+Independent review of interpretation labels, independent transport/security
+review, controlled fault-recovery observation on actual hardware, verification
+of every supported topology, and independent electrical validation remain open.
+The code is distributed as an **experimental** v1.5 release candidate, not
+battery safety instrumentation. Extended statistics, service/reset transactions
+and per-module serial retrieval are not live-validated or implemented.
