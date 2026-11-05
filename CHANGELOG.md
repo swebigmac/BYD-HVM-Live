@@ -14,7 +14,9 @@
 - Retain English UI/help, version banner, /? and /IPv4, interactive address entry and shortcut hint without a hardcoded address.
 - Add offline synthetic RTU simulator, Windows PowerShell5.1/7 CI and scoped research/aggregate validation documentation. No private raw captures or firmware images included.
 
-Validation: both Windows CI variants pass, including ready-timeout and CRC-error recovery. The real decoder also agrees with102 saved payloads in offline regression. Physical v1.5 operation and long-duration gateway recovery remain to be verified. See docs/VALIDATION.md.
+Validation: both Windows CI variants pass, including ready-timeout and CRC-error recovery. The real decoder also agrees with102 saved payloads in offline regression. Physical v1.5 operation has since been observed on one real three-tower installation, but prolonged fault-recovery and electrical metrology remain unverified. See docs/VALIDATION.md.
+
+October 2026 documentation follow-up: qualify observed full-charge balancing flags and voltage relaxation; document BIC board hardware and isoSPI hypothesis without asserting measured bleed current. No service/reset capability added.
 
 ## v1.4 (2026-10-16)
 
