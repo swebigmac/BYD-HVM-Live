@@ -4,8 +4,7 @@ Independent PowerShell diagnostics for BYD Battery-Box Premium HVM.
 
 **v1.5 is an experimental review build, not an official BYD application or a
 battery safety system.** Standard telemetry and recovery have automated tests
-on Windows PowerShell 5.1 and PowerShell 7. New live operation on physical
-hardware still needs verification; see [validation](docs/VALIDATION.md).
+on Windows PowerShell 5.1 and PowerShell 7. Physical operation on one three-tower HVM installation has been observed during October 2026, including per-cell readings, balance masks, low/high SOC and prolonged logging. This is observational validation, **not independent electrical calibration or safety certification**; see [validation](docs/VALIDATION.md).
 
 ## Start
 
@@ -109,6 +108,8 @@ does not redact data already committed or explicitly force-added. Research
 summaries here contain aggregates, not raw personal captures or firmware images.
 
 ## Development and research
+
+See [BIC hardware observations](docs/research/BIC-HARDWARE.md) for a cautiously qualified account of the module monitoring PCB, LTC6811 and possible passive balancing hardware.
 
 See [Phase 1 findings](docs/research/PHASE1.md), including the period-dependent
 energy discrepancy and why the experimental 66-byte statistics path stays out
