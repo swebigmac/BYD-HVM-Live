@@ -177,7 +177,8 @@ References:
 - Principal small BMU: BMU-P3-3.27-A-8956.bin, base0x08020000,
   SHA256eff6dcf6242310b0a71ee8e1dc9e7c1411a6b0d66e1200a891b773eb73999c3f.
 
-Decision: ship the ordinary-block additions as an experimental v1.5 for review,
-without expanding the wire request whitelist. Keep experimental service/statistics
-research separate. Private repository, no raw logs/firmware, no public release or
-upstream claim of a universally complete Modbus map.
+Release boundary: ordinary-block v1.5 is an experimental, independently
+maintained diagnostic monitor. The request whitelist remains unchanged.
+Service/statistics research stays separate. Raw installation logs, original
+firmware and identifying serials are deliberately not published. There is no
+claim of a universally complete or BYD-approved Modbus map.
